@@ -30,7 +30,7 @@
       </a>
     </header>
 
-    <div class="row g-5 mt-4">
+    <div class="row g-5">
       <div class="col">
         <div class="p-3 bcc-purle rounded">
           <div class="p-2 bcc-purle2 fw-bold fs-3">Nhiệt độ nước </div>
@@ -68,32 +68,46 @@
     <div class="h2">Cài đặt</div>
     <div class="d-flex  my-3 align-items-end">
       <!-- 4 button for up down left right -->
-      <div class="d-grid col-4  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
+      <div class="d-grid col-3  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
         <div class="d-flex justify-content-center">
-          <button class="btn btn-primary " type="button">Lên</button>
+          <button class="btn btn-primary " type="button" id="up_btn">Lên</button>
         </div>
         <div class="d-flex justify-content-center gap-2">
-          <button class="btn btn-primary " type="button">Trái</button>
-          <button class="btn btn-primary " type="button">Xuống</button>
-          <button class="btn btn-primary" type="button">Phải</button>
+          <button class="btn btn-primary " type="button" id="left_btn">Trái</button>
+          <button class="btn btn-primary " type="button" id="down_btn">Xuống</button>
+          <button class="btn btn-primary" type="button" id="right_btn">Phải</button>
         </div>
+        <button class="btn btn-danger" type="button" id="stop_btn">Dừng lại</button>
         <div class="text-center">Di chuyển</div>
       </div>
       <!-- two button for on and off pump -->
-      <div class="d-grid col-4  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
+      <div class="d-grid col-3  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
         <div class="d-flex justify-content-center">
-          <button class="btn btn-primary " type="button">Bật</button>
+          <button class="btn btn-primary " type="button" id="pump_on_btn">Bật</button>
         </div>
         <div class="d-flex justify-content-center">
-          <button class="btn btn-primary " type="button">Tắt</button>
+          <button class="btn btn-primary " type="button" id="pump_off_btn">Tắt</button>
         </div>
         <div class="text-center">Bật/Tắt bơm</div>
       </div>
+      <!-- two button for on and off feeding -->
+      <div class="d-grid col-3  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary " type="button" id="feed_on_btn">Bật</button>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary " type="button" id="feed_off_btn">Tắt</button>
+        </div>
+        <div class="text-center">Bật/Tắt cho ăn</div>
+      </div>
       <!-- input for changing time -->
-      <div class="d-grid col-4 justify-content-center">
-        <input class="form-control" type="time" placeholder="Nhập thời gian" aria-label="default input example">
-        <button class="btn btn-primary mt-2" type="button">Cài đặt</button>
-        <div class="text-center">Cài đặt thời gian</div>
+      <div class="d-grid col-3 justify-content-center">
+        <input id="time_input" class="form-control" type="time" placeholder="Nhập thời gian"
+          aria-label="default input example">
+        <input id="weight_input" class="form-control" type="number" placeholder="Nhập khối lượng (kg)"
+          aria-label="default input example">
+        <button class="btn btn-primary mt-2" type="button" id="time_set">Cài đặt</button>
+        <div class="text-center">Cài đặt thời gian/lượng thức ăn</div>
       </div>
     </div>
 
@@ -105,12 +119,123 @@
     <!-- socket -->
     <script src="../socket.io/socket.io.js"></script>
     <script>
+      var socket = io();
+
       const temp = document.getElementById("temp");
       const ph = document.getElementById("ph");
       const tds = document.getElementById("tds");
       const update = document.getElementById("update");
+      const up_btn = document.getElementById("up_btn");
+      const down_btn = document.getElementById("down_btn");
+      const left_btn = document.getElementById("left_btn");
+      const right_btn = document.getElementById("right_btn");
+      const stop_btn = document.getElementById("stop_btn");
+      const pump_on_btn = document.getElementById("pump_on_btn");
+      const pump_off_btn = document.getElementById("pump_off_btn");
+      const feed_on_btn = document.getElementById("feed_on_btn");
+      const feed_off_btn = document.getElementById("feed_off_btn");
+      const time_set = document.getElementById("time_set");
 
-      var socket = io();
+      const btns = [[up_btn, down_btn, left_btn, right_btn], [pump_on_btn, pump_off_btn], [feed_on_btn, feed_off_btn]]
+
+      function activeBtn(x, y) {
+        for (let i = 0; i < btns.length; i++) {
+          for (let j = 0; j < btns[i].length; j++) {
+            if (i == x && j == y) continue;
+            btns[i][j].classList.remove("btn-success");
+            btns[i][j].classList.add("btn-primary");
+          }
+        }
+        btns[x][y].classList.add("btn-success");
+        btns[x][y].classList.remove("btn-primary");
+      }
+
+      const control = {
+        direction: 0,
+        pump: 0,
+        isFeeding: 0,
+        weight: 0,
+        hour: 0,
+        minute: 0,
+      }
+
+      stop_btn.addEventListener("click", () => {
+        control.direction = 0;
+        activeBtn(0, 4);
+        socket.emit("/web/control", control);
+        console.log("stop");
+      });
+
+      up_btn.addEventListener("click", () => {
+        control.direction = 1;
+        activeBtn(0, 0);
+        socket.emit("/web/control", control);
+        console.log("up")
+      });
+
+      down_btn.addEventListener("click", () => {
+        control.direction = 2;
+        activeBtn(0, 1);
+        socket.emit("/web/control", control);
+        console.log("down")
+      });
+
+      left_btn.addEventListener("click", () => {
+        control.direction = 3;
+        activeBtn(0, 2);
+        socket.emit("/web/control", control);
+        console.log("left");
+      });
+
+      right_btn.addEventListener("click", () => {
+        control.direction = 4;
+        activeBtn(0, 3);
+        socket.emit("/web/control", control);
+        console.log("right");
+      });
+
+      pump_on_btn.addEventListener("click", () => {
+        control.pump = 1;
+        activeBtn(1, 0);
+        socket.emit("/web/control", control);
+        console.log("pump on");
+      });
+
+      pump_off_btn.addEventListener("click", () => {
+        control.pump = 0;
+        activeBtn(1, 1);
+        socket.emit("/web/control", control);
+        console.log("pump off");
+      });
+
+      feed_on_btn.addEventListener("click", () => {
+        control.isFeeding = 1;
+        activeBtn(2, 0);
+        socket.emit("/web/control", control);
+        console.log("feed on");
+      });
+
+      feed_off_btn.addEventListener("click", () => {
+        control.isFeeding = 0;
+        activeBtn(2, 1);
+        socket.emit("/web/control", control);
+        console.log("feed off");
+      });
+
+      time_set.addEventListener("click", () => {
+        const time = document.querySelector("#time_input").value;
+        const weight = document.querySelector("#weight_input").value;
+        if (!weight || weight < 0 || time == "") {
+          alert("Nhập lại thời gian và khối lượng thức ăn");
+          return;
+        }
+        console.log(time, weight);
+        control.weight = weight;
+        control.hour = time.split(":")[0];
+        control.minute = time.split(":")[1];
+        socket.emit("/web/control", control);
+      });
+
       socket.on('connect', function () {
         console.log('Connected!');
       });
@@ -139,7 +264,8 @@
         temp.innerText = `${data.waterTemp} độ C`;
         ph.innerText = `${data.PH} `;
         tds.innerText = `${data.TDS} ppm`;
-
+        const time = document.querySelector("input[type='time']")
+        time.value = `${data.hour}:${data.minute}`;
         addData(tempChart, data.waterTemp);
         addData(phChart, data.ph);
         addData(tdsChart, data.tds);
