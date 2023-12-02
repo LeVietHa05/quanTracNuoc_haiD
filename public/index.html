@@ -5,13 +5,18 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thiết bị quan trắc nước</title>
+  <title>Bè Thông Minh</title>
   <meta name="description" content="For monitoring the quality of water in HCM city">
   <link rel="stylesheet" href="stylesheets/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <!-- CSS only -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous" />
+  <style>
+    body {
+      background: linear-gradient(to right, #84fab0, #8fd3f4);
+    }
+  </style>
 </head>
 
 <body>
@@ -21,7 +26,7 @@
         <svg class="bi me-2" width="40" height="32">
           <use xlink:href="#bootstrap"></use>
         </svg>
-        <span class="fs-4 bcc-purle fw-bolder fs-2">Thiết bị quan trắc nước</span>
+        <span class="fs-4 bcc-purle fw-bolder fs-2">Bè Thông Minh</span>
       </a>
     </header>
 
@@ -31,7 +36,7 @@
           <div class="p-2 bcc-purle2 fw-bold fs-3">Nhiệt độ nước </div>
           <div class="fw-bold mt-5">Hiện tại :</div>
           <div id="temp" class="p-5 mb-5 fw-semibold fs-1 text-center border-bottom border-danger text-light">
-            20 độ C
+            23 độ C
           </div>
           <div class="fw-bold mb-4">Biểu đồ: </div>
           <canvas class="bg-light my-3" id="tempChart"> </canvas>
@@ -42,7 +47,7 @@
           <div class="p-2 bcc-darkYellow2 fw-bold fs-3">pH nước</div>
           <div class="fw-bold mt-5">Hiện tại :</div>
           <div id="ph" class="p-5 mb-5 fw-semibold fs-1 text-center border-bottom border-danger ">
-            90
+            7
           </div>
           <div class="fw-bold mb-4">Biểu đồ: </div>
           <canvas class="bg-light my-3" id="phChart"> </canvas>
@@ -53,149 +58,191 @@
           <div class="p-2 bcc-blue2 fw-bold fs-3">TDS</div>
           <div class="fw-bold mt-5">Hiện tại :</div>
           <div id="tds" class="p-5 mb-5 fw-semibold fs-1 text-center border-bottom border-danger ">
-            900 mg/l
+            900 ppm
           </div>
           <div class="fw-bold mb-4">Biểu đồ: </div>
           <canvas class="bg-light my-3" id="tdsChart"> </canvas>
         </div>
       </div>
     </div>
-    <div class="d-grid col-3 mx-auto my-3 align-items-end">
-      <button id="update" class="btn btn-info">Làm mới</button>
+    <div class="h2">Cài đặt</div>
+    <div class="d-flex  my-3 align-items-end">
+      <!-- 4 button for up down left right -->
+      <div class="d-grid col-4  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary " type="button">Lên</button>
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+          <button class="btn btn-primary " type="button">Trái</button>
+          <button class="btn btn-primary " type="button">Xuống</button>
+          <button class="btn btn-primary" type="button">Phải</button>
+        </div>
+        <div class="text-center">Di chuyển</div>
+      </div>
+      <!-- two button for on and off pump -->
+      <div class="d-grid col-4  gap-2 d-md-flex justify-content-md-end" style="flex-direction: column;">
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary " type="button">Bật</button>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary " type="button">Tắt</button>
+        </div>
+        <div class="text-center">Bật/Tắt bơm</div>
+      </div>
+      <!-- input for changing time -->
+      <div class="d-grid col-4 justify-content-center">
+        <input class="form-control" type="time" placeholder="Nhập thời gian" aria-label="default input example">
+        <button class="btn btn-primary mt-2" type="button">Cài đặt</button>
+        <div class="text-center">Cài đặt thời gian</div>
+      </div>
     </div>
-  </div>
 
-  <!-- JavaScript Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
-    crossorigin="anonymous"></script>
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+      crossorigin="anonymous"></script>
 
-  <!-- socket -->
-  <script src="../socket.io/socket.io.js"></script>
-  <script>
-    const temp = document.getElementById("temp");
-    const ph = document.getElementById("ph");
-    const tds = document.getElementById("tds");
-    const update = document.getElementById("update");
+    <!-- socket -->
+    <script src="../socket.io/socket.io.js"></script>
+    <script>
+      const temp = document.getElementById("temp");
+      const ph = document.getElementById("ph");
+      const tds = document.getElementById("tds");
+      const update = document.getElementById("update");
 
-    var socket = io();
-    socket.on('connect', function () {
-      console.log('Connected!');
-    });
-
-    update.addEventListener("click", () => {
-      socket.emit("UPDATE", "update");
-    });
-
-    socket.on("message", (data) => {
-      console.log(data);
-      temp.innerText = `${data.TEMP} độ C`;
-      ph.innerText = `${data.PH} `;
-      tds.innerText = `${data.TDS} mg/l`;
-
-      addData(tempChart, data.TEMP);
-      addData(phChart, data.PH);
-      addData(tdsChart, data.TDS);
-      if (tempChart.data.datasets[0].data.length > 30) removeData(tempChart);
-      if (phChart.data.datasets[0].data.length > 30)
-        removeData(phChart);
-      if (tdsChart.data.datasets[0].data.length > 30) removeData(tdsChart);
-    });
-  </script>
-
-  <!-- chart -->
-  <script>
-    const configTempCharts = {
-      type: "line",
-      data: {
-        labels: [
-          60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
-          26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
-        ],
-        datasets: [
-          {
-            label: "Temperature (Celsius)",
-            data: [],
-            borderColor: ["rgba(255, 100, 100, 1)"],
-            tension: 0.1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-      },
-    };
-    const configphChart = {
-      type: "line",
-      data: {
-        labels: [
-          60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
-          26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
-        ],
-        datasets: [
-          {
-            label: "pH ",
-            data: [],
-            borderColor: ["rgba(255, 100, 100, 1)"],
-            tension: 0.1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-      },
-    };
-    const configTdsChart = {
-      type: "line",
-      data: {
-        labels: [
-          60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
-          26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
-        ],
-        datasets: [
-          {
-            label: "Thể tích (lít) ",
-            data: [],
-            borderColor: ["rgba(255, 100, 100, 1)"],
-            tension: 0.1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-      },
-    };
-
-    const tempChart = new Chart(
-      document.getElementById("tempChart").getContext("2d"),
-      configTempCharts
-    );
-    const phChart = new Chart(
-      document.getElementById("phChart").getContext("2d"),
-      configphChart
-    );
-    const tdsChart = new Chart(
-      document.getElementById("tdsChart").getContext("2d"),
-      configTdsChart
-    );
-
-  </script>
-  <!-- update chart -->
-  <script>
-    function addData(chart, data) {
-      chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
+      var socket = io();
+      socket.on('connect', function () {
+        console.log('Connected!');
       });
-      chart.update();
-    }
 
-    function removeData(chart) {
-      chart.data.datasets.forEach((dataset) => {
-        dataset.data.shift();
+      // update.addEventListener("click", () => {
+      //   socket.emit("UPDATE", "update");
+      // });
+
+      socket.on("message", (data) => {
+        console.log(data);
+        temp.innerText = `${data.TEMP} độ C`;
+        ph.innerText = `${data.PH} `;
+        tds.innerText = `${data.TDS} mg/l`;
+
+        addData(tempChart, data.TEMP);
+        addData(phChart, data.PH);
+        addData(tdsChart, data.TDS);
+        if (tempChart.data.datasets[0].data.length > 30) removeData(tempChart);
+        if (phChart.data.datasets[0].data.length > 30)
+          removeData(phChart);
+        if (tdsChart.data.datasets[0].data.length > 30) removeData(tdsChart);
       });
-      chart.update();
-    }
-  </script>
+
+      socket.on("/web/measure", (data) => {
+        console.log(data);
+        temp.innerText = `${data.waterTemp} độ C`;
+        ph.innerText = `${data.PH} `;
+        tds.innerText = `${data.TDS} ppm`;
+
+        addData(tempChart, data.waterTemp);
+        addData(phChart, data.ph);
+        addData(tdsChart, data.tds);
+        if (tempChart.data.datasets[0].data.length > 30) removeData(tempChart);
+        if (phChart.data.datasets[0].data.length > 30)
+          removeData(phChart);
+        if (tdsChart.data.datasets[0].data.length > 30) removeData(tdsChart);
+      });
+    </script>
+
+    <!-- chart -->
+    <script>
+      const configTempCharts = {
+        type: "line",
+        data: {
+          labels: [
+            60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
+            26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
+          ],
+          datasets: [
+            {
+              label: "Temperature (Celsius)",
+              data: [],
+              borderColor: ["rgba(255, 100, 100, 1)"],
+              tension: 0.1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+        },
+      };
+      const configphChart = {
+        type: "line",
+        data: {
+          labels: [
+            60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
+            26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
+          ],
+          datasets: [
+            {
+              label: "pH ",
+              data: [],
+              borderColor: ["rgba(255, 100, 100, 1)"],
+              tension: 0.1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+        },
+      };
+      const configTdsChart = {
+        type: "line",
+        data: {
+          labels: [
+            60, 58, 56, 54, 52, 50, 48, 46, 44, 42, 40, 38, 36, 34, 32, 30, 28,
+            26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0,
+          ],
+          datasets: [
+            {
+              label: "Thể tích (lít) ",
+              data: [],
+              borderColor: ["rgba(255, 100, 100, 1)"],
+              tension: 0.1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+        },
+      };
+
+      const tempChart = new Chart(
+        document.getElementById("tempChart").getContext("2d"),
+        configTempCharts
+      );
+      const phChart = new Chart(
+        document.getElementById("phChart").getContext("2d"),
+        configphChart
+      );
+      const tdsChart = new Chart(
+        document.getElementById("tdsChart").getContext("2d"),
+        configTdsChart
+      );
+
+    </script>
+    <!-- update chart -->
+    <script>
+      function addData(chart, data) {
+        chart.data.datasets.forEach((dataset) => {
+          dataset.data.push(data);
+        });
+        chart.update();
+      }
+
+      function removeData(chart) {
+        chart.data.datasets.forEach((dataset) => {
+          dataset.data.shift();
+        });
+        chart.update();
+      }
+    </script>
 </body>
 
 </html>
