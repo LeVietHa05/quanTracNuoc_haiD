@@ -265,7 +265,7 @@
         ph.innerText = `${data.PH} `;
         tds.innerText = `${data.TDS} ppm`;
         const time = document.querySelector("input[type='time']")
-        time.value = `${data.hour}:${data.minute}`;
+        time.value = `${data.time}`;
         addData(tempChart, data.waterTemp);
         addData(phChart, data.ph);
         addData(tdsChart, data.tds);
