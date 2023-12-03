@@ -139,13 +139,12 @@
       const btns = [[up_btn, down_btn, left_btn, right_btn], [pump_on_btn, pump_off_btn], [feed_on_btn, feed_off_btn]]
 
       function activeBtn(x, y) {
-        for (let i = 0; i < btns.length; i++) {
-          for (let j = 0; j < btns[i].length; j++) {
-            if (i == x && j == y) continue;
-            btns[i][j].classList.remove("btn-success");
-            btns[i][j].classList.add("btn-primary");
-          }
+        for (let j = 0; j < btns[i].length; j++) {
+          if (j == y) continue;
+          btns[x][j].classList.remove("btn-success");
+          btns[x][j].classList.add("btn-primary");
         }
+        if (y == 4) return;
         btns[x][y].classList.add("btn-success");
         btns[x][y].classList.remove("btn-primary");
       }
@@ -262,8 +261,8 @@
       socket.on("/web/measure", (data) => {
         console.log(data);
         temp.innerText = `${data.waterTemp} độ C`;
-        ph.innerText = `${data.PH} `;
-        tds.innerText = `${data.TDS} ppm`;
+        ph.innerText = `${data.ph} `;
+        tds.innerText = `${data.tds} ppm`;
         const time = document.querySelector("input[type='time']")
         time.value = `${data.time}`;
         addData(tempChart, data.waterTemp);
